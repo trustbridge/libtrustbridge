@@ -45,7 +45,7 @@ class SubscriptionsRepoTest(TestCase):
         assert kwargs['Key'] == 'AAA/BBB/CCC/ff0d1111f6636c354cf92c7137f1b5e6'
         assert kwargs['Body'].read() == b'{"c": "http://callback.url/1", "e": null}'
 
-    def test_get_subscription_by_id__should_return_subscriptions(self):
+    def test_get_subscriptions_by_id__should_return_subscriptions(self):
         repo = SubscriptionsRepo(connection_data=self.connection_data)
         self.client.list_objects.return_value = {
             'Contents': [{'Key': 'some_ref/ff0d1111f6636c354cf92c7137f1b5e6'}]
@@ -68,7 +68,7 @@ class SubscriptionsRepoTest(TestCase):
             Key='some_ref/ff0d1111f6636c354cf92c7137f1b5e6'
         )
 
-    def test_get_subscription_by_pattern__should_return_subscriptions(self):
+    def test_get_subscriptions_by_pattern__should_return_subscriptions(self):
         repo = SubscriptionsRepo(connection_data=self.connection_data)
         self.client.list_objects.side_effect = [
             {'Contents': []},
@@ -82,10 +82,34 @@ class SubscriptionsRepoTest(TestCase):
         }
 
         subscriptions = repo.get_subscriptions_by_pattern(Pattern('aa.bb'))
-
+        assert len(list(subscriptions)) == 1
         assert list(subscriptions)[0].callback_url == 'http://callback.url/1'
         assert self.client.list_objects.mock_calls == [
             mock.call(Bucket='subscriptions', Prefix='AA/', Delimiter='/'),
             mock.call(Bucket='subscriptions', Prefix='AA/BB/', Delimiter='/')
         ]
         self.client.get_object.assert_called_once_with(Bucket='subscriptions', Key='AA/BB/ff0d1111f6636c354cf92c7137f1b5e6')
+
+    def test_get_subscriptions_by_pattern__when_same_callback__should_return_one(self):
+        repo = SubscriptionsRepo(connection_data=self.connection_data)
+        self.client.list_objects.side_effect = [
+            {'Contents': [{'Key': 'AA/ff0d1111f6636c354cf92c7137f1b5e6'}]},
+            {'Contents': [{'Key': 'AA/BB/ff0d1111f6636c354cf92c7137f1b5e6'}]},
+        ]
+        self.client.get_object.side_effect = [
+            {
+                'Body': BytesIO(b'{"c": "http://callback.url/1", "e": null}'),
+                'Bucket': 'subscriptions',
+                'ContentLength': 39,
+                'Key': 'AA',
+            },
+            {
+                'Body': BytesIO(b'{"c": "http://callback.url/1", "e": null}'),
+                'Bucket': 'subscriptions',
+                'ContentLength': 39,
+                'Key': 'AA/BB',
+            },
+        ]
+
+        subscriptions = repo.get_subscriptions_by_pattern(Pattern('aa'))
+        assert len(subscriptions) == 1
