@@ -25,12 +25,12 @@ setuptools.setup(
         "sentry-sdk==0.14.3",
         "boto3==1.13.3",
         "pycountry==19.8.18",
-
     ],
     extras_require={
         'testing': [
             "pytest==5.4.1",
             "pytest-flask==1.0.0",
+            "freezegun==0.3.15",
         ]
     }
 )
