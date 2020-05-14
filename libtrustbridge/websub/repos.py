@@ -105,7 +105,7 @@ class DeliveryOutboxRepo(elasticmqrepo.ElasticMQRepo):
         return 'delivery-outbox'
 
 
-class NotificationOutboxRepo(elasticmqrepo.ElasticMQRepo):
+class NotificationsRepo(elasticmqrepo.ElasticMQRepo):
     def _get_queue_name(self):
         return 'notifications'
 
