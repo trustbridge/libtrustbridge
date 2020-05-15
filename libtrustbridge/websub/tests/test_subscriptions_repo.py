@@ -60,7 +60,9 @@ class SubscriptionsRepoTest(TestCase):
         subscriptions = repo.get_subscriptions_by_id(Id('some_ref'))
 
         assert list(subscriptions)[0].callback_url == 'http://callback.url/1'
-        self.client.list_objects.assert_called_once_with(Bucket='subscriptions', Prefix='some_ref')
+        self.client.list_objects.assert_called_once_with(
+            Bucket='subscriptions', Prefix='some_ref', Delimiter='/'
+        )
         self.client.get_object.assert_called_once_with(
             Bucket='subscriptions',
             Key='some_ref/ff0d1111f6636c354cf92c7137f1b5e6'
@@ -83,7 +85,7 @@ class SubscriptionsRepoTest(TestCase):
 
         assert list(subscriptions)[0].callback_url == 'http://callback.url/1'
         assert self.client.list_objects.mock_calls == [
-            mock.call(Bucket='subscriptions', Prefix='AA/'),
-            mock.call(Bucket='subscriptions', Prefix='AA/BB/')
+            mock.call(Bucket='subscriptions', Prefix='AA/', Delimiter='/'),
+            mock.call(Bucket='subscriptions', Prefix='AA/BB/', Delimiter='/')
         ]
         self.client.get_object.assert_called_once_with(Bucket='subscriptions', Key='AA/BB/ff0d1111f6636c354cf92c7137f1b5e6')
