@@ -13,11 +13,11 @@ logger = logging.getLogger(__name__)
 class SubscriptionsRepo(MinioRepo):
     DEFAULT_BUCKET = 'subscriptions'
 
-    def subscribe_by_id(self, id: Id, url, expiration_seconds=None):
+    def subscribe_by_id(self, id: Id, url, expiration_seconds):
         key = id.to_key(url)
         return self._subscribe_by_key(key, url, expiration_seconds)
 
-    def subscribe_by_pattern(self, pattern: Pattern, url, expiration_seconds=None):
+    def subscribe_by_pattern(self, pattern: Pattern, url, expiration_seconds):
         key = pattern.to_key(url=url)
         return self._subscribe_by_key(key, url, expiration_seconds)
 

@@ -5,8 +5,7 @@ from datetime import datetime
 import dateutil
 
 from .utils import url_to_filename, expiration_datetime
-from .exceptions import SubscriptionExpired, InvalidSubscriptionFormat
-
+from .exceptions import SubscriptionExpired, InvalidSubscriptionFormat, SubscriptionMissingExpiration
 
 logger = logging.getLogger(__name__)
 
@@ -100,8 +99,12 @@ class Subscription:
         return self.data[self.CALLBACK_KEY]
 
     @classmethod
-    def encode_obj(cls, callback, expiration_seconds):
-        expiration = expiration_datetime(expiration_seconds).isoformat() if expiration_seconds else None
+    def encode_obj(cls, callback, expiration_seconds: int):
+        if not expiration_seconds:
+            raise SubscriptionMissingExpiration()
+
+        expiration = expiration_datetime(expiration_seconds).isoformat()
+
         data = {
             cls.CALLBACK_KEY: callback,
             cls.EXPIRATION_KEY: expiration

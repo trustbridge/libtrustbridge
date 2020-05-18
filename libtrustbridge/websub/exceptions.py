@@ -94,3 +94,7 @@ class SubscriptionExpired(Exception):
 
 class InvalidSubscriptionFormat(Exception):
     pass
+
+
+class SubscriptionMissingExpiration(Exception):
+    pass
