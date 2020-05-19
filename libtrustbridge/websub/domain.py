@@ -5,8 +5,7 @@ from datetime import datetime
 import dateutil
 
 from .utils import url_to_filename, expiration_datetime
-from .exceptions import SubscriptionExpired, InvalidSubscriptionFormat
-
+from .exceptions import SubscriptionExpired, InvalidSubscriptionFormat, SubscriptionMissingExpiration
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +76,7 @@ class Subscription:
         except UnicodeError as e:
             raise InvalidSubscriptionFormat("data is not UTF-8") from e
         except ValueError as e:
-            logger.warning("Tried to decode JSON data %s but failed", json_data)
+            logger.warning("Tried to decode JSON data %s but failed", payload)
             raise InvalidSubscriptionFormat("data is not a valid JSON") from e
 
         try:
@@ -100,10 +99,20 @@ class Subscription:
         return self.data[self.CALLBACK_KEY]
 
     @classmethod
-    def encode_obj(cls, callback, expiration_seconds):
-        expiration = expiration_datetime(expiration_seconds).isoformat() if expiration_seconds else None
+    def encode_obj(cls, callback, expiration_seconds: int):
+        if not expiration_seconds:
+            raise SubscriptionMissingExpiration()
+
+        expiration = expiration_datetime(expiration_seconds).isoformat()
+
         data = {
             cls.CALLBACK_KEY: callback,
             cls.EXPIRATION_KEY: expiration
         }
         return json.dumps(data).encode('utf-8')
+
+    def __hash__(self):
+        return hash(self.callback_url)
+
+    def __eq__(self, other):
+        return self.callback_url == other.callback_url
