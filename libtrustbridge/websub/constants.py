@@ -4,6 +4,7 @@ TOPIC_ATTR_KEY = 'hub.topic'
 CALLBACK_ATTR_KEY = 'hub.callback'
 MODE_ATTR_KEY = 'hub.mode'
 LEASE_SECONDS_ATTR_KEY = 'hub.lease_seconds'
+SECRET_ATTR_KEY = 'hub.secret'
 
 
 __HOUR = 3600
