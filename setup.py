@@ -25,6 +25,7 @@ setuptools.setup(
         "sentry-sdk==0.14.3",
         "boto3==1.13.3",
         "pycountry==19.8.18",
+        "marshmallow==3.6.0",
     ],
     extras_require={
         'testing': [
