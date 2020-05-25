@@ -10,15 +10,15 @@ from libtrustbridge.websub.domain import Pattern, Subscription
 class PatternTest(TestCase):
     def test_to_key__when_empty__should_return_error(self):
         with pytest.raises(ValueError):
-            Pattern(predicate='').to_key()
+            Pattern(topic='').to_key()
 
     def test_to_key__when_contains_slashes__should_return_error(self):
         with pytest.raises(ValueError):
-            Pattern(predicate='aa/bb').to_key()
+            Pattern(topic='aa/bb').to_key()
 
     def test_to_key__when_wildcard_without_dot__should_return_error(self):
         with pytest.raises(ValueError):
-            Pattern(predicate='aa.bb*').to_key()
+            Pattern(topic='aa.bb*').to_key()
 
     def test_to_key__when_predicate_valid__should_return_key(self):
         assert Pattern('aaaa.bbbb.cccc').to_key() == "AAAA/BBBB/CCCC/"
