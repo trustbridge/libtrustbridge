@@ -22,28 +22,28 @@ class Id:
 
 
 class Pattern:
-    def __init__(self, predicate):
-        self.predicate = predicate
+    def __init__(self, topic):
+        self.topic = topic
 
     def to_key(self, url=''):
         self._validate()
-        if self.predicate.endswith('.'):
-            self.predicate = self.predicate[:-1]
-        if self.predicate.endswith('*'):
-            self.predicate = self.predicate[:-1]
+        if self.topic.endswith('.'):
+            self.topic = self.topic[:-1]
+        if self.topic.endswith('*'):
+            self.topic = self.topic[:-1]
 
-        predicate_parts = self.predicate.upper().split('.')
-        key = '/'.join([p for p in predicate_parts if p]) + '/'
+        parts = self.topic.upper().split('.')
+        key = '/'.join([p for p in parts if p]) + '/'
         if url:
             key += url_to_filename(url)
         return key
 
     def _validate(self):
-        if not self.predicate:
-            raise ValueError("non-empty predicate is required")
-        if '/' in self.predicate:
-            raise ValueError("predicate should contain dots, not slashes")
-        if self.predicate.endswith('*') and self.predicate[-2] != '.':
+        if not self.topic:
+            raise ValueError("non-empty topic is required")
+        if '/' in self.topic:
+            raise ValueError("topic should contain dots, not slashes")
+        if self.topic.endswith('*') and self.topic[-2] != '.':
             raise ValueError("* character is supported only after a dot")
 
     def to_layers(self):
