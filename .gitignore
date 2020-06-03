@@ -125,3 +125,6 @@ dmypy.json
 .pyre/
 
 *~
+
+# generated docs
+/docs/_build/*
