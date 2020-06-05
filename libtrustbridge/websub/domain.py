@@ -67,6 +67,7 @@ class Subscription:
             self.data = self._decode(payload)
             self.is_valid = True
         except (InvalidSubscriptionFormat, SubscriptionExpired) as e:
+            self.data = None
             self.is_valid = False
             self.error = str(e)
 
@@ -80,7 +81,7 @@ class Subscription:
             raise InvalidSubscriptionFormat("data is not a valid JSON") from e
 
         try:
-            callback = data[self.CALLBACK_KEY]
+            data[self.CALLBACK_KEY]  # to raise KeyError
             expiration = data.get(self.EXPIRATION_KEY)
             if expiration:
                 data[self.EXPIRATION_KEY] = dateutil.parser.parse(expiration)
@@ -96,7 +97,11 @@ class Subscription:
 
     @property
     def callback_url(self):
-        return self.data[self.CALLBACK_KEY]
+        if self.data:
+            return self.data[self.CALLBACK_KEY]
+        else:
+            # expired or wrongly initialized subscription
+            return None
 
     @classmethod
     def encode_obj(cls, callback, expiration_seconds: int):
@@ -112,7 +117,9 @@ class Subscription:
         return json.dumps(data).encode('utf-8')
 
     def __hash__(self):
-        return hash(self.callback_url)
+        return hash(self.callback_url) if self.callback_url else 0
 
     def __eq__(self, other):
+        if self.callback_url is None or other.callback_url is None:
+            return False
         return self.callback_url == other.callback_url
