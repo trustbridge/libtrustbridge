@@ -7,6 +7,7 @@ from libtrustbridge.utils.conf import env_bool
 from libtrustbridge.domain.wire_protocols.generic_discrete import Message
 from libtrustbridge.utils.serializers import MessageJSONEncoder
 
+TESTING = env_bool('TESTING', default=False)
 IGL_ALLOW_UNSAFE_REPO_CLEAR = env_bool('IGL_ALLOW_UNSAFE_REPO_CLEAR', default=False)
 IGL_ALLOW_UNSAFE_REPO_IS_EMPTY = env_bool('IGL_ALLOW_UNSAFE_REPO_IS_EMPTY', default=False)
 
@@ -154,6 +155,11 @@ class ElasticMQRepo:
         except Exception:  # TODO be specific
             return False
         return True
+
+    def _unsafe_method__clear(self):
+        if not TESTING:
+            raise RuntimeError('This method is allowed only when env TESTING=True')
+        self.client.purge_queue(QueueUrl=self.queue_url)
 
     def _unsafe_clear_for_test(self):
         if not IGL_ALLOW_UNSAFE_REPO_CLEAR:

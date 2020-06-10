@@ -9,6 +9,7 @@ from libtrustbridge.utils.conf import env_bool
 
 logger = logging.getLogger(__name__)
 
+TESTING = env_bool('TESTING', default=False)
 IGL_ALLOW_UNSAFE_REPO_CLEAR = env_bool('IGL_ALLOW_UNSAFE_REPO_CLEAR', default=False)
 IGL_ALLOW_UNSAFE_REPO_IS_EMPTY = env_bool('IGL_ALLOW_UNSAFE_REPO_IS_EMPTY', default=False)
 
@@ -145,6 +146,18 @@ class MinioRepo:
 
     # primarily for testing purposes
     # do not use in production code
+    def _unsafe_method__clear(self):
+        if not TESTING:
+            raise RuntimeError('This method is allowed only when env TESTING=True')
+        deleted = 0
+        while True:
+            response = self.client.list_objects(Bucket=self.bucket_name)
+            for obj in response.get('Contents', []):
+                self.client.delete_object(Bucket=self.bucket_name, Key=obj['Key'])
+                deleted += 1
+            if not response['IsTruncated']:
+                return deleted
+
     def _unsafe_clear_for_test(self):
         if not IGL_ALLOW_UNSAFE_REPO_CLEAR:
             raise RuntimeError(
