@@ -5,13 +5,9 @@ import boto3
 from botocore.client import ClientError
 
 from libtrustbridge.domain.wire_protocols.generic_discrete import Message
-from libtrustbridge.utils.conf import env_bool
+from libtrustbridge.utils.conf import TESTING
 
 logger = logging.getLogger(__name__)
-
-TESTING = env_bool('TESTING', default=False)
-IGL_ALLOW_UNSAFE_REPO_CLEAR = env_bool('IGL_ALLOW_UNSAFE_REPO_CLEAR', default=False)
-IGL_ALLOW_UNSAFE_REPO_IS_EMPTY = env_bool('IGL_ALLOW_UNSAFE_REPO_IS_EMPTY', default=False)
 
 
 def slash_chunk(uri):
@@ -144,9 +140,11 @@ class MinioRepo:
             ContentLength=len(content_body)
         )
 
-    # primarily for testing purposes
-    # do not use in production code
     def _unsafe_method__clear(self):
+        """
+        primarily for testing purposes
+        DO NOT use in production code
+        """
         if not TESTING:
             raise RuntimeError('This method is allowed only when env TESTING=True')
         deleted = 0
@@ -158,30 +156,7 @@ class MinioRepo:
             if not response['IsTruncated']:
                 return deleted
 
-    def _unsafe_clear_for_test(self):
-        if not IGL_ALLOW_UNSAFE_REPO_CLEAR:
-            raise RuntimeError(
-                'repo._unsafe_clear_for_test method allowed only when env IGL_ALLOW_UNSAFE_REPO_CLEAR=True'
-            )
-        deleted = 0
-        while True:
-            response = self.client.list_objects(
-                Bucket=self.bucket_name
-            )
-            for obj in response.get('Contents', []):
-                self.client.delete_object(
-                    Bucket=self.bucket_name,
-                    Key=obj['Key']
-                )
-                deleted += 1
-            if not response['IsTruncated']:
-                return deleted
-
-    def _unsafe_is_empty_for_test(self):
-        if not IGL_ALLOW_UNSAFE_REPO_IS_EMPTY:
-            raise RuntimeError(
-                'repo._unsafe_is_empty_for_test method allowed only when env IGL_ALLOW_UNSAFE_REPO_IS_EMPTY=True'
-            )
+    def is_empty(self):
         response = self.client.list_objects(
             Bucket=self.bucket_name
         )

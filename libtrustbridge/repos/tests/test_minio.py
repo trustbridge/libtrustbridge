@@ -170,19 +170,15 @@ def test_operations(boto3):
         repo.put_object(content_body=CONTENT)
 
 
-@mock.patch(f'{MINIOREPO_MODULE}.IGL_ALLOW_UNSAFE_REPO_CLEAR', False)
-@mock.patch(f'{MINIOREPO_MODULE}.IGL_ALLOW_UNSAFE_REPO_IS_EMPTY', False)
+@mock.patch(f'{MINIOREPO_MODULE}.TESTING', False)
 @mock.patch(f'{MINIOREPO_MODULE}.boto3', autospec=True)
 def test_unsafe_operations_not_allowed(boto3):
     repo = MinioRepo(CONNECTION_DATA)
     with pytest.raises(RuntimeError):
-        repo._unsafe_clear_for_test()
-    with pytest.raises(RuntimeError):
-        repo._unsafe_is_empty_for_test()
+        repo._unsafe_method__clear()
 
 
-@mock.patch(f'{MINIOREPO_MODULE}.IGL_ALLOW_UNSAFE_REPO_CLEAR', True)
-@mock.patch(f'{MINIOREPO_MODULE}.IGL_ALLOW_UNSAFE_REPO_IS_EMPTY', True)
+@mock.patch(f'{MINIOREPO_MODULE}.TESTING', True)
 @mock.patch(f'{MINIOREPO_MODULE}.boto3', autospec=True)
 def test_unsafe_operations(boto3):
     s3_client = boto3.client.return_value
@@ -201,7 +197,7 @@ def test_unsafe_operations(boto3):
         'IsTruncated': False
     }
     # deleted 2 objects
-    assert repo._unsafe_clear_for_test() == 2
+    assert repo._unsafe_method__clear() == 2
     s3_client.list_objects.assert_called_once_with(Bucket=CONNECTION_DATA['bucket'])
     # deleted only objects from the response
     assert s3_client.delete_object.call_count == 2
@@ -211,11 +207,11 @@ def test_unsafe_operations(boto3):
     ]
     boto3.reset_mock()
     # testing unsafe is empty
-    assert not repo._unsafe_is_empty_for_test()
+    assert not repo.is_empty()
     s3_client.list_objects.assert_called_once_with(Bucket=CONNECTION_DATA['bucket'])
     boto3.reset_mock()
 
     s3_client.list_objects.return_value['Contents'] = []
-    assert repo._unsafe_is_empty_for_test()
+    assert repo.is_empty()
     s3_client.list_objects.assert_called_once_with(Bucket=CONNECTION_DATA['bucket'])
     boto3.reset_mock()

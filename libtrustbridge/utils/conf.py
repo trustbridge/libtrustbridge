@@ -264,3 +264,5 @@ STATSD_HOST = env_none('MON_STATSD_HOST', default=None)
 if STATSD_HOST:
     STATSD_PREFIX = env_none('MON_STATSD_PREFIX', default='intergov')
     STATSD_PORT = int(env_none('MON_STATSD_PORT', default=8125))
+
+TESTING = env_bool('TESTING', False)

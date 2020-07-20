@@ -204,25 +204,21 @@ def test_operations(boto3):
     sqs_client.delete_message.assert_called_once()
 
 
-@mock.patch(f'{ELASTICMQREPO_MODULE}.IGL_ALLOW_UNSAFE_REPO_CLEAR', False)
-@mock.patch(f'{ELASTICMQREPO_MODULE}.IGL_ALLOW_UNSAFE_REPO_IS_EMPTY', False)
+@mock.patch(f'{ELASTICMQREPO_MODULE}.TESTING', False)
 @mock.patch(f'{ELASTICMQREPO_MODULE}.boto3', autospec=True)
 def test_unsafe_operations_not_allowed(boto3):
     repo = ElasticMQRepo(CONNECTION_DATA)
     with pytest.raises(RuntimeError):
-        repo._unsafe_clear_for_test()
-    with pytest.raises(RuntimeError):
-        repo._unsafe_is_empty_for_test()
+        repo._unsafe_method__clear()
 
 
-@mock.patch(f'{ELASTICMQREPO_MODULE}.IGL_ALLOW_UNSAFE_REPO_CLEAR', True)
-@mock.patch(f'{ELASTICMQREPO_MODULE}.IGL_ALLOW_UNSAFE_REPO_IS_EMPTY', True)
+@mock.patch(f'{ELASTICMQREPO_MODULE}.TESTING', True)
 @mock.patch(f'{ELASTICMQREPO_MODULE}.boto3', autospec=True)
 def test_unsafe_operations(boto3):
     sqs_client = boto3.client.return_value
     sqs_client.get_queue_url.return_value = {'QueueUrl': QUEUE_URL}
     repo = ElasticMQRepo(CONNECTION_DATA)
-    repo._unsafe_clear_for_test()
+    repo._unsafe_method__clear()
     sqs_client.purge_queue.assert_called_once_with(
         QueueUrl=QUEUE_URL
     )
@@ -235,10 +231,10 @@ def test_unsafe_operations(boto3):
             }
         ]
     }
-    assert not repo._unsafe_is_empty_for_test()
+    assert not repo.is_empty()
     sqs_client.receive_message.return_value = {
         "Messages": []
     }
-    assert repo._unsafe_is_empty_for_test()
+    assert repo.is_empty()
     sqs_client.receive_message.return_value = {}
-    assert repo._unsafe_is_empty_for_test()
+    assert repo.is_empty()

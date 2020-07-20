@@ -3,13 +3,10 @@ import logging
 
 import boto3
 
-from libtrustbridge.utils.conf import env_bool
+from libtrustbridge.utils.conf import TESTING
 from libtrustbridge.domain.wire_protocols.generic_discrete import Message
 from libtrustbridge.utils.serializers import MessageJSONEncoder
 
-TESTING = env_bool('TESTING', default=False)
-IGL_ALLOW_UNSAFE_REPO_CLEAR = env_bool('IGL_ALLOW_UNSAFE_REPO_CLEAR', default=False)
-IGL_ALLOW_UNSAFE_REPO_IS_EMPTY = env_bool('IGL_ALLOW_UNSAFE_REPO_IS_EMPTY', default=False)
 
 logger = logging.getLogger(__name__)
 
@@ -161,18 +158,7 @@ class ElasticMQRepo:
             raise RuntimeError('This method is allowed only when env TESTING=True')
         self.client.purge_queue(QueueUrl=self.queue_url)
 
-    def _unsafe_clear_for_test(self):
-        if not IGL_ALLOW_UNSAFE_REPO_CLEAR:
-            raise RuntimeError(
-                'repo._unsafe_clear_for_test method allowed only when env IGL_ALLOW_UNSAFE_REPO_CLEAR=True'
-            )
-        self.client.purge_queue(QueueUrl=self.queue_url)
-
-    def _unsafe_is_empty_for_test(self):
-        if not IGL_ALLOW_UNSAFE_REPO_IS_EMPTY:
-            raise RuntimeError(
-                'repo._unsafe_is_empty_for_test method allowed only when env IGL_ALLOW_UNSAFE_REPO_IS_EMPTY=True'
-            )
+    def is_empty(self):
         response = self.client.receive_message(
             QueueUrl=self.queue_url,
             MaxNumberOfMessages=1,
