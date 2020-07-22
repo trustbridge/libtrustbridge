@@ -18,7 +18,7 @@ class SubscriptionForm(Schema):
     """
     topic = fields.Str(data_key=TOPIC_ATTR_KEY, required=True)
     callback = fields.Str(data_key=CALLBACK_ATTR_KEY, required=True,
-                          validate=validate.URL(schemes=SUPPORTED_CALLBACK_URL_SCHEMES))
+                          validate=validate.URL(schemes=SUPPORTED_CALLBACK_URL_SCHEMES, require_tld=False))
     mode = fields.Str(data_key=MODE_ATTR_KEY, required=True,
                       validate=validate.OneOf(choices=SUPPORTED_MODES))
     lease_seconds = fields.Integer(data_key=LEASE_SECONDS_ATTR_KEY,
