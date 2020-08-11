@@ -19,6 +19,7 @@ setuptools.setup(
     python_requires='>=3.6',
     install_requires=[
         "Flask==1.1.2",
+        "Flask-Script==2.0.6",
         "py-cid==0.2.1",
         "multihash==0.1.1",
         "minio==4.0.16",
@@ -26,6 +27,8 @@ setuptools.setup(
         "boto3==1.13.3",
         "pycountry==19.8.18",
         "marshmallow==3.6.0",
+        "apispec[yaml,validation]==3.3.1",
+        "apispec-webframeworks==0.5.2",
     ],
     extras_require={
         'testing': [
