@@ -23,7 +23,7 @@ setuptools.setup(
         "py-cid==0.2.1",
         "multihash==0.1.1",
         "minio==4.0.16",
-        "sentry-sdk==0.14.3",
+        "sentry-sdk==1.14.0",
         "boto3==1.13.3",
         "pycountry==19.8.18",
         "marshmallow==3.6.0",
