@@ -18,7 +18,7 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     install_requires=[
-        "Flask==1.1.2",
+        "Flask==2.3.2",
         "Flask-Script==2.0.6",
         "py-cid==0.2.1",
         "multihash==0.1.1",
